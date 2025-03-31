@@ -17,6 +17,10 @@ public class Main {
             //insertBook(connection, "Hallo Welt!", "Kai Weluda", 2005, true);
             printAllBooks(connection);
 
+            findBooksBetweenYears(connection, 2000, 2025);
+            getIsAvailable(connection, true);
+            getIsAvailable(connection, false);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -58,6 +62,58 @@ public class Main {
                 }
             }
         } catch  (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void findBooksBetweenYears(Connection con, int startYear, int endYear) {
+        String query = "SELECT * FROM books WHERE publication_year between ? and ?;";
+
+        try(PreparedStatement preparedStatement = con.prepareStatement(query)) {
+            preparedStatement.setInt(1, startYear);
+            preparedStatement.setInt(2, endYear);
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+
+                System.out.println("Books published between " + startYear + " and " + endYear + ":\n");
+
+                while (resultSet.next()) {
+
+                    System.out.println("ID: " + resultSet.getInt("book_id"));
+                    System.out.println("Title: " + resultSet.getString("title"));
+                    System.out.println("Author: " + resultSet.getString("author"));
+                    System.out.println("Publication Year: " + resultSet.getInt("publication_year") + "\n");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void getIsAvailable(Connection con, boolean isAvailable) {
+        String query = "SELECT * FROM books WHERE is_available = ?;";
+
+        try(PreparedStatement preparedStatement = con.prepareStatement(query)) {
+            preparedStatement.setBoolean(1, isAvailable);
+
+            if(isAvailable) {
+                System.out.println("Books that are available:");
+            } else {
+                System.out.println("Books that are not available:");
+            }
+
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    System.out.println("ID: " + resultSet.getInt("book_id"));
+                    System.out.println("Title: " + resultSet.getString("title"));
+                    System.out.println("Author: " + resultSet.getString("author"));
+                    System.out.println("Publication Year: " + resultSet.getInt("publication_year") + "\n");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
             throw new RuntimeException(e);
         }
     }
