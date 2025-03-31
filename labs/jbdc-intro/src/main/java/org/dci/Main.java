@@ -23,6 +23,12 @@ public class Main {
             //getIsAvailable(connection, false);
             findBooksByTitlePrefix(connection, "Brot");
             getBooksSorted(connection, "publication_year", "DSC");
+            System.out.println("PAGINATED:");
+
+            for(int i = 0; i <= 6; i = i + 2) {
+                paginatedBooks(connection, 2, i);
+            };
+
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -169,6 +175,30 @@ public class Main {
                 }
             }
         } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void paginatedBooks(Connection con, int limit, int offset) {
+        String query = "SELECT * FROM books LIMIT ? OFFSET ?";
+
+        try(PreparedStatement preparedStatement = con.prepareStatement(query)) {
+            preparedStatement.setInt(1, limit);
+            preparedStatement.setInt(2, offset);
+
+            Thread.sleep(1000);
+
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    System.out.println("ID: " + resultSet.getInt("book_id"));
+                    System.out.println("Title: " + resultSet.getString("title"));
+                    System.out.println("Author: " + resultSet.getString("author"));
+                    System.out.println("Publication Year: " + resultSet.getInt("publication_year") + "\n");
+                }
+            }
+        } catch (SQLException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
