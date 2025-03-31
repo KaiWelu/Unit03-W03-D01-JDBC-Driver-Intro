@@ -1,6 +1,7 @@
 package org.dci;
 
 import java.sql.*;
+import java.util.Objects;
 
 public class Main {
     private static String jbcdUrl = "jdbc:postgresql://localhost:5432/library_db";
@@ -15,11 +16,13 @@ public class Main {
 
             // insert books
             //insertBook(connection, "Hallo Welt!", "Kai Weluda", 2005, true);
-            printAllBooks(connection);
+            //printAllBooks(connection);
 
-            findBooksBetweenYears(connection, 2000, 2025);
-            getIsAvailable(connection, true);
-            getIsAvailable(connection, false);
+            //findBooksBetweenYears(connection, 2000, 2025);
+            //getIsAvailable(connection, true);
+            //getIsAvailable(connection, false);
+            findBooksByTitlePrefix(connection, "Brot");
+            getBooksSorted(connection, "publication_year", "DSC");
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -114,6 +117,58 @@ public class Main {
             }
         } catch (SQLException e) {
             System.out.println(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void findBooksByTitlePrefix(Connection con, String prefix) {
+        String query = "SELECT * FROM books WHERE title LIKE ?;";
+
+        try(PreparedStatement preparedStatement = con.prepareStatement(query)) {
+            preparedStatement.setString(1, prefix + "%");
+
+
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    System.out.println("ID: " + resultSet.getInt("book_id"));
+                    System.out.println("Title: " + resultSet.getString("title"));
+                    System.out.println("Author: " + resultSet.getString("author"));
+                    System.out.println("Publication Year: " + resultSet.getInt("publication_year") + "\n");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void getBooksSorted(Connection con, String orderBy, String orderDirection) {
+        String query;
+
+        if(Objects.equals(orderDirection, "ASC")) {
+            query = "SELECT * FROM books ORDER BY ? ASC;";
+        } else {
+            query = "SELECT * FROM books ORDER BY ? DESC;";
+        }
+
+
+
+        try(PreparedStatement preparedStatement = con.prepareStatement(query)) {
+            preparedStatement.setString(1, orderBy);
+
+
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    System.out.println("ID: " + resultSet.getInt("book_id"));
+                    System.out.println("Title: " + resultSet.getString("title"));
+                    System.out.println("Author: " + resultSet.getString("author"));
+                    System.out.println("Publication Year: " + resultSet.getInt("publication_year") + "\n");
+                }
+            }
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
